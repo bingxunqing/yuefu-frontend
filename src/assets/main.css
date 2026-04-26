@@ -1,0 +1,31 @@
+@import "tailwindcss";
+/* src/assets/main.css */
+/* * 4. 全局补充样式
+ * 客观指出：虽然 Tailwind 提供了丰富的工具类，但为了确保整个 App 容器
+ * （特别是引入了 Ant Design 的 Layout 组件后）能够正确撑满屏幕且不出现意外滚动条，
+ * 必须在全局定义最外层节点的高度。
+ */
+html, body, #app {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  /* Apple 系统背景灰 */
+  background-color: #F5F5F7;
+  /* 字体抗锯齿，更清晰 */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+/* * 修复：Tailwind 的 Preflight 可能会导致 Ant Design 的部分按钮背景变为透明。
+ * 如果后续发现按钮样式异常，可以在此处强制重置按钮的背景继承逻辑。
+ */
+@layer base {
+  button,
+  [type='button'],
+  [type='reset'],
+  [type='submit'] {
+    background-color: inherit;
+  }
+}
