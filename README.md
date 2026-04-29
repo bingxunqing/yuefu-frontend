@@ -2,7 +2,7 @@
   <img src="src/assets/logo.svg" alt="Yuefu Logo" width="120" />
   <h1>Yuefu (乐府)</h1>
   <p><b>基于多模态大模型与智能 Agent 的 OMR 乐谱解析与高性能可视化引擎</b></p>
-  <p><i>第十九届全国大学生软件创新大赛参赛作品 | 希望之峰小队</i></p>
+ 
   
   <p>
     <a href="https://vuejs.org/"><img src="https://img.shields.io/badge/Vue-3.x-brightgreen.svg" alt="Vue 3"></a>
