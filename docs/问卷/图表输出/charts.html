@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>乐府软件用户需求调查 - 数据图表</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: 'Microsoft YaHei', 'SimHei', sans-serif; padding: 20px; background: #f5f5f5; margin: 0; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 { text-align: center; color: #1a5276; margin: 20px 0 10px; }
+        .subtitle { text-align: center; color: #666; margin-bottom: 20px; }
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+        .chart-container { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); page-break-inside: avoid; }
+        h2 { color: #2874a6; border-bottom: 2px solid #3498db; padding-bottom: 10px; margin-top: 0; font-size: 18px; }
+        @media print { .grid { grid-template-columns: 1fr; } body { background: white; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>乐府软件用户需求调查</h1>
+        <p class="subtitle">有效问卷: 64份 | 调研日期: 2026年3月</p>
+
+        <div class="grid">
+            <!-- Q1: 音乐背景 -->
+            <div class="chart-container">
+                <h2>Q1: 您的音乐背景是？</h2>
+                <canvas id="chartQ1"></canvas>
+            </div>
+
+            <!-- Q2: 主要乐器 -->
+            <div class="chart-container">
+                <h2>Q2: 您主要使用的乐器是？（多选）</h2>
+                <canvas id="chartQ2"></canvas>
+            </div>
+
+            <!-- Q3: 获取乐谱方式 -->
+            <div class="chart-container">
+                <h2>Q3: 您平时获取乐谱的方式是？（多选）</h2>
+                <canvas id="chartQ3"></canvas>
+            </div>
+
+            <!-- Q4: 最希望做的事情 -->
+            <div class="chart-container">
+                <h2>Q4: 拿到新乐谱时最希望做的事？</h2>
+                <canvas id="chartQ4"></canvas>
+            </div>
+
+            <!-- Q5: 困难 -->
+            <div class="chart-container">
+                <h2>Q5: 理解新乐谱时遇到的困难（多选）</h2>
+                <canvas id="chartQ5"></canvas>
+            </div>
+
+            <!-- Q6-Q10: 功能需求 -->
+            <!-- <div class="chart-container">
+                <h2>Q6-Q10: 功能需求程度分布</h2>
+                <canvas id="chartQ6Q10"></canvas>
+            </div> -->
+
+            <!-- Q11: AI功能 -->
+            <div class="chart-container">
+                <h2>Q11: 最感兴趣的 AI 功能（多选）</h2>
+                <canvas id="chartQ11"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    Chart.register(ChartDataLabels);
+
+    // 数据
+    const data = {
+        q1: {
+            labels: ['初学者(<1年)', '业余学习者(1-5年)', '进阶学习者', '音乐专业学生'],
+            values: [27, 19, 11, 1]
+        },
+        q2: {
+            labels: ['钢琴', '小提琴', '作曲/编曲', '声乐', '管乐器', '吉他', '长笛'],
+            values: [18, 16, 16, 14, 13, 9, 1]
+        },
+        q3: {
+            labels: ['乐谱网站下载', '音乐软件自带乐谱', 'PDF乐谱', '图片/拍照', '纸质教材/书籍', '自己编写'],
+            values: [31, 28, 26, 20, 3, 1]
+        },
+        q4: {
+            labels: ['立即试听整体效果', '直接开始练习', '分析旋律与节奏结构', '查看难度是否适合'],
+            values: [25, 23, 20, 17]
+        },
+        q5: {
+            labels: ['识谱速度慢', '很难快速想象音乐整体效果', '图片或纸质乐谱无法直接播放', '没有方便的试听工具', '乐谱复杂(多声部/节奏)'],
+            values: [35, 33, 27, 23, 3]
+        },
+        demand: {
+            labels: ['AI辅助音乐', '图片乐谱识别(OMR)', '乐谱可视化', '乐谱编辑功能', '乐谱即时试听'],
+            very_hope: [41, 35, 34, 32, 31],
+            can_have: [14, 19, 22, 18, 20],
+            dont_care: [2, 4, 2, 8, 6],
+            not_need: [1, 0, 0, 0, 1]
+        },
+        q11: {
+            labels: ['AI分析乐曲难度', 'AI旋律润色', 'AI推荐练习方式', 'AI自动编曲', 'AI生成伴奏'],
+            values: [18, 18, 17, 17, 13]
+        }
+    };
+
+    // 颜色
+    const colors = {
+        blue: ['#1a5276', '#2874a6', '#3498db', '#5dade2', '#85c1e9'],
+        green: ['#1b5e20', '#2e7d32', '#388e3c', '#4caf50', '#81c784'],
+        multi: ['#4C72B0', '#DD8452', '#55A868', '#C44E52', '#8172B3', '#937860', '#3b3b3b'],
+        demand: {'非常希望': '#2e7d32', '可以有': '#81c784', '无所谓': '#bdbdbd', '不需要': '#e57373'}
+    };
+
+    // 数据标签配置
+    const dataLabelOptions = {
+        font: { weight: 'bold', size: 12 },
+        color: 'white'
+    };
+
+    // Q1: 环形图
+    new Chart(document.getElementById('chartQ1'), {
+        type: 'doughnut',
+        data: {
+            labels: data.q1.labels,
+            datasets: [{
+                data: data.q1.values,
+                backgroundColor: colors.blue,
+                borderWidth: 0,
+                datalabels: {
+                    formatter: (value, ctx) => {
+                        const pct = Math.round(value/64*100);
+                        return `${value}人\n(${pct}%)`;
+                    },
+                    color: 'white',
+                    font: { weight: 'bold', size: 14 }
+                }
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'bottom', labels: { font: { size: 12 } } },
+                title: { display: false }
+            }
+        }
+    });
+
+    // Q2: 水平条形图
+    new Chart(document.getElementById('chartQ2'), {
+        type: 'bar',
+        data: {
+            labels: data.q2.labels,
+            datasets: [{
+                label: '人数',
+                data: data.q2.values,
+                backgroundColor: colors.multi,
+                borderWidth: 0,
+                datalabels: {
+                    anchor: 'end',
+                    align: 'end',
+                    formatter: (value) => value + '人',
+                    font: { size: 12 }
+                }
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: { x: { max: 22, title: { display: true, text: '人数' } } }
+        }
+    });
+
+    // Q3
+    new Chart(document.getElementById('chartQ3'), {
+        type: 'bar',
+        data: {
+            labels: data.q3.labels,
+            datasets: [{
+                label: '人数',
+                data: data.q3.values,
+                backgroundColor: colors.multi,
+                borderWidth: 0,
+                datalabels: {
+                    anchor: 'end',
+                    align: 'end',
+                    formatter: (value) => value + '人',
+                    font: { size: 12 }
+                }
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: { x: { max: 36, title: { display: true, text: '人数' } } }
+        }
+    });
+
+    // Q4
+    new Chart(document.getElementById('chartQ4'), {
+        type: 'bar',
+        data: {
+            labels: data.q4.labels,
+            datasets: [{
+                label: '人数',
+                data: data.q4.values,
+                backgroundColor: colors.green,
+                borderWidth: 0,
+                datalabels: {
+                    anchor: 'end',
+                    align: 'end',
+                    formatter: (value) => value + '人',
+                    font: { size: 12 }
+                }
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: { x: { max: 30, title: { display: true, text: '人数' } } }
+        }
+    });
+
+    // Q5
+    new Chart(document.getElementById('chartQ5'), {
+        type: 'bar',
+        data: {
+            labels: data.q5.labels,
+            datasets: [{
+                label: '人数',
+                data: data.q5.values,
+                backgroundColor: colors.multi,
+                borderWidth: 0,
+                datalabels: {
+                    anchor: 'end',
+                    align: 'end',
+                    formatter: (value) => value + '人',
+                    font: { size: 12 }
+                }
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: { x: { max: 40, title: { display: true, text: '人数' } } }
+        }
+    });
+
+    // Q6-Q10: 堆叠条形图
+    new Chart(document.getElementById('chartQ6Q10'), {
+        type: 'bar',
+        data: {
+            labels: data.demand.labels,
+            datasets: [
+                { label: '非常希望', data: data.demand.very_hope, backgroundColor: colors.demand['非常希望'], datalabels: { formatter: v => v > 0 ? v : '', color: 'white', font: { size: 11 } } },
+                { label: '可以有', data: data.demand.can_have, backgroundColor: colors.demand['可以有'], datalabels: { formatter: v => v > 0 ? v : '', color: 'white', font: { size: 11 } } },
+                { label: '无所谓', data: data.demand.dont_care, backgroundColor: colors.demand['无所谓'], datalabels: { formatter: v => v > 0 ? v : '', color: 'white', font: { size: 11 } } },
+                { label: '不需要', data: data.demand.not_need, backgroundColor: colors.demand['不需要'], datalabels: { formatter: v => v > 0 ? v : '', color: 'white', font: { size: 11 } } }
+            ]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                x: { stacked: true },
+                y: { stacked: true, max: 64, title: { display: true, text: '人数' } }
+            },
+            plugins: {
+                legend: { position: 'bottom' },
+                title: { display: true, text: '按"非常希望"占比排序', font: { size: 12 } }
+            }
+        }
+    });
+
+    // Q11
+    new Chart(document.getElementById('chartQ11'), {
+        type: 'bar',
+        data: {
+            labels: data.q11.labels,
+            datasets: [{
+                label: '人数',
+                data: data.q11.values,
+                backgroundColor: colors.green,
+                borderWidth: 0,
+                datalabels: {
+                    anchor: 'end',
+                    align: 'end',
+                    formatter: (value) => value + '人',
+                    font: { size: 12 }
+                }
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: { x: { max: 22, title: { display: true, text: '人数' } } }
+        }
+    });
+    </script>
+</body>
+</html>
